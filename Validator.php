@@ -7,12 +7,27 @@
 class Validator
 {
 
-    // 错误信息
+    // 默认的错误提示
+    public $defaultErrorTips = array(
+        "format" => '格式错误',
+        "required" => '字段不存在',
+        "maxLength" => '超出长度限制',
+        "minLength" => '长度低于限制',
+    );
+    // 系统预设零值
+    public $systemZeroMap = array(
+        "string" => '',
+        "date" => null,
+        "email" => '',
+        "int" => 0,
+    );
+
+
+    // 校验到的错误信息
     public $error = array();
     // 默认零值
     public $selfZeroMap = array();
-    // 默认零值
-    public $systemZeroMap = array();
+    
     // 必填校验
     public $columnMustRequire = array();
     // 最大长度校验
@@ -23,8 +38,7 @@ class Validator
     public $originParams = array();
     // 传入的错误提示
     public $selfErrorTips = array();
-    // 默认的错误提示
-    public $defaultErrorTips = array();
+    
     // 格式化后的数据
     public $formatedParams = array();
     // 格式化函数
@@ -59,7 +73,6 @@ class Validator
                 $this->columnMustRequire[$columnName] = $ruleDescription["required"];
             }
         }
-
         // 格式化函数
         foreach ($rules as $columnName => $ruleDescription) {
             if(isset($ruleDescription["filter"])){
@@ -87,38 +100,6 @@ class Validator
                     # code...
                     break;
             }
-
-            // $this->validItem($columnName,$validatorRuleMap);
-
-
-            // foreach ($validatorRuleMap as $ruleTag => $ruleDescription) {
-            //     $this->validItem($columnName,$ruleDescription,$params);
-            //     switch ($ruleTag) {
-            //         case 'format':
-            //             # 格式校验
-            //             $this->validItem($columnName,$ruleDescription,$params);
-            //             break;
-            //         case 'required':
-            //             # 是否必填
-            //             break;
-            //         case 'maxLength':
-            //             # 最大长度校验
-            //             break;
-            //         case 'minLength':
-            //             # 最小长度校验
-            //             break;
-            //         case 'default':
-            //             # 默认值|零值
-            //             break;
-
-            //         case 'layout':
-            //             # 格式 | 浮点型的小数位、时间字符串的格式化
-            //             break;
-            //         default:
-            //             # code...
-            //             break;
-            //     }
-            // }
         }
         return $this->formatedParams;
     }
