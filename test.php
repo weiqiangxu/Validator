@@ -1,7 +1,7 @@
 <?php
 
 
-
+include("./Validator.php");
 
 // "required|length:6,16",
 $rules = [
@@ -9,6 +9,7 @@ $rules = [
     'birthday'   => ['format' => 'date', 'required' => false, 'layout' => 'Y-m-d', 'default' => null],
     'contracte_mail' => ['format' => 'email', 'minLength' => 3, 'maxLength' => 100], //'length' => 100, 
     'phone_number' => ['format' => 'string', 'maxLength' => 5, 'filter' => ['trim']],
+    'money' => ['format' => 'int', 'max' => 5, 'min' => 1],
 ];
 
 $msgs = array(
@@ -30,5 +31,9 @@ $result = $Validator->CheckMap($params, $rules, $msgs);
 if ($Validator->getError()) {
     return $Validator->getError();
 }
+
+var_dump($result);
+
+var_dump($Validator->getError());
 
 // update insert...result为过滤后的数组
