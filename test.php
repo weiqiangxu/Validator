@@ -28,12 +28,6 @@ $params = array(
 
 $Validator = new Validator();
 $result = $Validator->CheckMap($params, $rules, $msgs);
-if ($Validator->getError()) {
-    return $Validator->getError();
-}
 
-var_dump($result);
-
-var_dump($Validator->getError());
-
-// update insert...result为过滤后的数组
+print_r($result);
+print_r($Validator->error);
