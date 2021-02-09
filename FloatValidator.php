@@ -1,10 +1,10 @@
 <?php
 
 /**
- * IntegerValidator
+ * FloatValidator
  * @author wytanxu@tencent.com
  */
-class IntegerValidator implements BaseValidator
+class FloatValidator implements BaseValidator
 {
 
     /**
@@ -67,7 +67,7 @@ class IntegerValidator implements BaseValidator
                     $error = '数字不得超出最小限制';
                     break;
                 case 'format':
-                    $error = '限定数字格式';
+                    $error = '格式不是小数点格式';
                     break;
                 default:
                     break;
@@ -90,7 +90,7 @@ class IntegerValidator implements BaseValidator
             && 
             !isset($this->params[$columnName])
         ){
-            $this->validatorObj->setError($columnName,'required');
+            $this->setError($columnName,'required');
         }
         return;
     }
@@ -103,8 +103,10 @@ class IntegerValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName]) && preg_grep("/^[-]{0,1}[0-9]+$/",$this->params[$columnName])){
-            $this->setError($columnName,'format');
+        if(isset($this->params[$columnName])){
+            if(!preg_match('/^[-]{0,1}[0-9]+[.][0-9]+$|^[-]{0,1}[0-9]$/i', $this->params[$columnName])){
+                $this->setError($columnName,'format');
+            }
         }
         return;
     }

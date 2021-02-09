@@ -1,10 +1,10 @@
 <?php
 
 /**
- * IntegerValidator
+ * RegexValidator类
  * @author wytanxu@tencent.com
  */
-class IntegerValidator implements BaseValidator
+class RegexValidator implements BaseValidator
 {
 
     /**
@@ -60,14 +60,11 @@ class IntegerValidator implements BaseValidator
                 case 'required':
                     $error = '字段值不能为空';
                     break;
-                case 'max':
-                    $error = '数字大小超出限制';
-                    break;
-                case 'min':
-                    $error = '数字不得超出最小限制';
-                    break;
                 case 'format':
-                    $error = '限定数字格式';
+                    $error = '正则校验不通过';
+                    break;
+                case 'regex':
+                    $error = '正则表达式缺失';
                     break;
                 default:
                     break;
@@ -88,9 +85,9 @@ class IntegerValidator implements BaseValidator
             && 
             boolval($this->rules[$columnName]['required'])
             && 
-            !isset($this->params[$columnName])
+            !isset($this->params[$columnName])  
         ){
-            $this->validatorObj->setError($columnName,'required');
+            $this->setError($columnName,'required');
         }
         return;
     }
@@ -103,51 +100,91 @@ class IntegerValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName]) && preg_grep("/^[-]{0,1}[0-9]+$/",$this->params[$columnName])){
-            $this->setError($columnName,'format');
+        if(isset($this->params[$columnName])){
+            if(empty($this->rules[$columnName]['regex'])){
+                $this->setError($columnName,'regex');
+            }
+            if(
+                !empty($this->rules[$columnName]['regex'])
+                &&
+                !preg_match($this->rules[$columnName]['regex'],$this->params[$columnName])
+            ){
+                $this->setError($columnName,'format');
+            }
         }
         return;
     }
 
     /**
-     * 数字最大值校验
+     * 最大长度校验
      *
      * @param string $columnName
      * @return void
      */
-    protected function max($columnName){
-        if(isset($this->params[$columnName])
+    protected function maxLength($columnName){
+        if(isset($this->params[$columnName]) 
             && 
             (
-                !empty($this->rules[$columnName]['max'])
+                !empty($this->rules[$columnName]['maxLength'])
                 && 
-                intval($this->params[$columnName]) > $this->rules[$columnName]['max']
+                strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength']
             )
         ){
-            $this->setError($columnName,'max');
+            $this->setError($columnName,'maxLength');
         }
         return;
     }
 
     /**
-     * 数字最小值校验
+     * 最小长度校验
      *
      * @param string $columnName
      * @return void
      */
-    protected function min($columnName){
+    protected function minLength($columnName){
         if(isset($this->params[$columnName])){
             if( 
-                isset($this->rules[$columnName]['min']) 
+                isset($this->rules[$columnName]['minLength']) 
                 && 
-                intval($this->params[$columnName]) < intval($this->rules[$columnName]['min'])
+                strlen($this->params[$columnName]) > $this->rules[$columnName]['minLength']
             ){
-                $this->setError($columnName,'min');
+                $this->setError($columnName,'minLength');
             }            
         }
         return;
     }
 
+    /**
+     * 过滤函数处理
+     *
+     * @param string $columnName
+     * @return void
+     */
+    protected function filter($columnName){
+        if(empty($this->rules[$columnName]["filter"])){
+            return;
+        }
+        if(!is_array($this->rules[$columnName]["filter"])){
+            return;
+        }
+        if(!empty($this->error)){
+            return;
+        }
+        foreach ($this->rules[$columnName]["filter"] as $func) {
+            switch ($func) {
+                case 'trim':
+                    $this->params[$columnName] = trim($this->params[$columnName]);
+                    break;
+                case 'filterSpace':
+                    $this->params[$columnName] = str_replace(' ','',$this->params[$columnName]);
+                    break;
+                default:
+                    # code...
+                    break;
+            }
+        }
+        return;
+    }
 
 
     /**
@@ -181,10 +218,13 @@ class IntegerValidator implements BaseValidator
         $this->required($columnName);
         // 2 格式校验
         $this->format($columnName);
-        // 3 最大数值校验
-        $this->max($columnName);
-        // 4 最小数值校验
-        $this->min($columnName);
+        // 3 最大长度校验
+        $this->maxLength($columnName);
+        // 4 最小长度校验
+        $this->minLength($columnName);
+        // 5 格式化函数处理
+        $this->filter($columnName);
+        
         return;
     }
 }

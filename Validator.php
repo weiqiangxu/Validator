@@ -5,17 +5,27 @@
  */
 class Validator
 {
-
-    /* 类地图 */
-	private static $classmap = null;
-
     /**
      * @var array
      */
     protected $_validators = [
-        'string'       => StringValidator::class,
-        'int'       => IntegerValidator::class,
+        'string' => StringValidator::class,
+        'int' => IntegerValidator::class,
+        'date' => DateValidator::class,
+        'phone' => PhoneValidator::class,
+        'dateTime' => DateTimeValidator::class,
+        'range' => RangeValidator::class,
+        'float' => FloatValidator::class,
+        'regex' => RegexValidator::class,
     ];
+
+    /**
+     * construct func
+     */
+    public function __construct()
+    {
+        spl_autoload_register(array(__CLASS__, 'autoload'));
+    }
 
     /**
      * 错误集合
@@ -46,35 +56,17 @@ class Validator
     public $msgs = array();
 
     /**
-     * construct func
-     */
-    public function __construct()
-    {
-        #类库映射
-		self::$classmap = array (
-            'BaseValidator' 	=> './BaseValidator.php',
-			'StringValidator' 	=> './StringValidator.php',
-			'IntegerValidator' 	=> './IntegerValidator.php',
-		);
-        spl_autoload_register(array(__CLASS__,'autoload'));
-    }
-
-
-    /**
      * 自动加载函数
      *
-     * @param string $class
+     * @param string $className
      * @return void
      */
-    public static function autoload($class)
-	{
-		if (isset(self::$classmap[$class])) 
-		{
-			$classfile = self::$classmap [$class];
-			require_once ($classfile);
-			return;
-		}
-	}
+    public static function autoload($className)
+    {
+        $classfile = './'.$className.'.php';
+        require_once($classfile);
+        return;
+    }
 
     /**
      * 校验数组
@@ -94,6 +86,9 @@ class Validator
         $this->rules = $rules;
         $this->msgs = $msgs;
         foreach ($rules as $columnName => $validatorRuleMap) {
+            if(empty($validatorRuleMap['format'])){
+                continue;
+            }
             # 逐行校验
             if (!isset($this->_validators[$validatorRuleMap['format']])) {
                 continue;
@@ -105,7 +100,7 @@ class Validator
             $validator = new $validatorClass($this);
             $validator->validate($columnName);
             $this->error = array_merge($this->error, $validator->getError());
-            if(!empty($this->params[$columnName])){
+            if (!empty($this->params[$columnName])) {
                 $this->params[$columnName] = $validator->getParam($columnName);
             }
         }

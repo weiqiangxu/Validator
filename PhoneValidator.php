@@ -1,10 +1,10 @@
 <?php
 
 /**
- * IntegerValidator
+ * PhoneValidator
  * @author wytanxu@tencent.com
  */
-class IntegerValidator implements BaseValidator
+class PhoneValidator implements BaseValidator
 {
 
     /**
@@ -60,14 +60,8 @@ class IntegerValidator implements BaseValidator
                 case 'required':
                     $error = '字段值不能为空';
                     break;
-                case 'max':
-                    $error = '数字大小超出限制';
-                    break;
-                case 'min':
-                    $error = '数字不得超出最小限制';
-                    break;
                 case 'format':
-                    $error = '限定数字格式';
+                    $error = '手机号码格式非法';
                     break;
                 default:
                     break;
@@ -83,14 +77,14 @@ class IntegerValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if(
+        if (
             isset($this->rules[$columnName]['required'])
-            && 
+            &&
             boolval($this->rules[$columnName]['required'])
-            && 
+            &&
             !isset($this->params[$columnName])
-        ){
-            $this->validatorObj->setError($columnName,'required');
+        ) {
+            $this->setError($columnName, 'required');
         }
         return;
     }
@@ -103,51 +97,14 @@ class IntegerValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName]) && preg_grep("/^[-]{0,1}[0-9]+$/",$this->params[$columnName])){
-            $this->setError($columnName,'format');
+        if (isset($this->params[$columnName]) ) {
+            if(!preg_match('/^(((13[0-9]{1})|(15[0-9]{1})|(16[0-9]{1})|(17[3-8]{1})|(18[0-9]{1})|(19[0-9]{1})|(14[5-7]{1}))+\d{8})$/',
+                $this->params[$columnName])){
+                $this->setError($columnName,"format");
+            }
         }
         return;
     }
-
-    /**
-     * 数字最大值校验
-     *
-     * @param string $columnName
-     * @return void
-     */
-    protected function max($columnName){
-        if(isset($this->params[$columnName])
-            && 
-            (
-                !empty($this->rules[$columnName]['max'])
-                && 
-                intval($this->params[$columnName]) > $this->rules[$columnName]['max']
-            )
-        ){
-            $this->setError($columnName,'max');
-        }
-        return;
-    }
-
-    /**
-     * 数字最小值校验
-     *
-     * @param string $columnName
-     * @return void
-     */
-    protected function min($columnName){
-        if(isset($this->params[$columnName])){
-            if( 
-                isset($this->rules[$columnName]['min']) 
-                && 
-                intval($this->params[$columnName]) < intval($this->rules[$columnName]['min'])
-            ){
-                $this->setError($columnName,'min');
-            }            
-        }
-        return;
-    }
-
 
 
     /**
@@ -156,7 +113,8 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function getParam($columnName){
+    public function getParam($columnName)
+    {
         return $this->params[$columnName];
     }
 
@@ -165,7 +123,8 @@ class IntegerValidator implements BaseValidator
      *
      * @return array
      */
-    public function getError(){
+    public function getError()
+    {
         return $this->error;
     }
 
@@ -176,15 +135,13 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function validate($columnName){
+    public function validate($columnName)
+    {
         // 1 必填校验
         $this->required($columnName);
         // 2 格式校验
         $this->format($columnName);
-        // 3 最大数值校验
-        $this->max($columnName);
-        // 4 最小数值校验
-        $this->min($columnName);
+
         return;
     }
 }

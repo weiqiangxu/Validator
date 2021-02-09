@@ -1,10 +1,10 @@
 <?php
 
 /**
- * IntegerValidator
+ * DateTimeValidator
  * @author wytanxu@tencent.com
  */
-class IntegerValidator implements BaseValidator
+class DateTimeValidator implements BaseValidator
 {
 
     /**
@@ -67,7 +67,7 @@ class IntegerValidator implements BaseValidator
                     $error = '数字不得超出最小限制';
                     break;
                 case 'format':
-                    $error = '限定数字格式';
+                    $error = '必须为日期时间格式';
                     break;
                 default:
                     break;
@@ -83,14 +83,14 @@ class IntegerValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if(
+        if (
             isset($this->rules[$columnName]['required'])
-            && 
+            &&
             boolval($this->rules[$columnName]['required'])
-            && 
+            &&
             !isset($this->params[$columnName])
-        ){
-            $this->validatorObj->setError($columnName,'required');
+        ) {
+            $this->setError($columnName, 'required');
         }
         return;
     }
@@ -103,47 +103,96 @@ class IntegerValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName]) && preg_grep("/^[-]{0,1}[0-9]+$/",$this->params[$columnName])){
-            $this->setError($columnName,'format');
+        if (isset($this->params[$columnName])) {
+            if(!$this->checkDateTimeFormat($this->params[$columnName])){
+                $this->setError($columnName, 'format');
+            }
         }
         return;
     }
 
     /**
-     * 数字最大值校验
+     * 日期最大值校验
      *
      * @param string $columnName
      * @return void
      */
-    protected function max($columnName){
-        if(isset($this->params[$columnName])
-            && 
-            (
-                !empty($this->rules[$columnName]['max'])
-                && 
-                intval($this->params[$columnName]) > $this->rules[$columnName]['max']
-            )
-        ){
-            $this->setError($columnName,'max');
+    protected function max($columnName)
+    {
+        if (
+            isset($this->params[$columnName])
+            &&
+            strtotime($this->params[$columnName])
+            &&
+            (!empty($this->rules[$columnName]['max'])
+                &&
+                strtotime($this->rules[$columnName]['max'])
+                &&
+                strtotime($this->params[$columnName]) > strtotime($this->rules[$columnName]['max']))
+        ) {
+            $this->setError($columnName, 'max');
         }
         return;
     }
 
     /**
-     * 数字最小值校验
+     * 日期最小值校验
      *
      * @param string $columnName
      * @return void
      */
-    protected function min($columnName){
-        if(isset($this->params[$columnName])){
-            if( 
-                isset($this->rules[$columnName]['min']) 
-                && 
-                intval($this->params[$columnName]) < intval($this->rules[$columnName]['min'])
-            ){
-                $this->setError($columnName,'min');
-            }            
+    protected function min($columnName)
+    {
+        if (
+            isset($this->params[$columnName])
+            &&
+            strtotime($this->params[$columnName])
+            &&
+            (!empty($this->rules[$columnName]['min'])
+                &&
+                strtotime($this->rules[$columnName]['min'])
+                &&
+                strtotime($this->params[$columnName]) < strtotime($this->rules[$columnName]['min']))
+        ) {
+            $this->setError($columnName, 'min');
+        }
+        return;
+    }
+
+    /**
+     * 校验日期格式
+     *
+     * @param string $date
+     * @link https://www.runoob.com/w3cnote/date-format-validation-in-php.html
+     * @return void
+     */
+    function checkDateTimeFormat($date)
+    {
+        $dateTime = date_create($date);
+        if (!$dateTime || $date != date_format($dateTime,'Y-m-d H:i:s')) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 格式化日期
+     *
+     * @param string $columnName
+     * @return void
+     */
+    protected function layout($columnName)
+    {
+        if (
+            isset($this->params[$columnName])
+            &&
+            strtotime($this->params[$columnName])
+            &&
+            !empty($this->rules[$columnName]['layout'])
+            &&
+            empty($this->error)
+        ) {
+            $this->params[$columnName] = date($this->rules[$columnName]['layout'], strtotime($this->params[$columnName]));
         }
         return;
     }
@@ -156,7 +205,8 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function getParam($columnName){
+    public function getParam($columnName)
+    {
         return $this->params[$columnName];
     }
 
@@ -165,7 +215,8 @@ class IntegerValidator implements BaseValidator
      *
      * @return array
      */
-    public function getError(){
+    public function getError()
+    {
         return $this->error;
     }
 
@@ -176,7 +227,8 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function validate($columnName){
+    public function validate($columnName)
+    {
         // 1 必填校验
         $this->required($columnName);
         // 2 格式校验
@@ -185,6 +237,8 @@ class IntegerValidator implements BaseValidator
         $this->max($columnName);
         // 4 最小数值校验
         $this->min($columnName);
+        // 5 格式化
+        $this->layout($columnName);
         return;
     }
 }

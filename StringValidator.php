@@ -57,7 +57,7 @@ class StringValidator implements BaseValidator
         } else {
             $error = '';
             switch ($errorTag) {
-                case 'require':
+                case 'required':
                     $error = '字段值不能为空';
                     break;
                 case 'maxLength':
@@ -66,7 +66,7 @@ class StringValidator implements BaseValidator
                 case 'minLength':
                     $error = '字段长度小于最小长度';
                     break;
-                case 'string':
+                case 'format':
                     $error = '限定字符串格式';
                     break;
                 default:
@@ -90,7 +90,7 @@ class StringValidator implements BaseValidator
             && 
             !isset($this->params[$columnName])  
         ){
-            $this->validatorObj->setError($columnName,'required');
+            $this->setError($columnName,'required');
         }
         return;
     }
@@ -101,10 +101,10 @@ class StringValidator implements BaseValidator
      * 格式校验
      * @return void
      */
-    protected function string($columnName)
+    protected function format($columnName)
     {
-        if(isset($params[$columnName]) && (is_array($params[$columnName]) || is_object($params[$columnName]))){
-            $this->setError($columnName,'string');
+        if(isset($this->params[$columnName]) && (is_array($this->params[$columnName]) || is_object($this->params[$columnName]))){
+            $this->setError($columnName,'format');
         }
         return;
     }
@@ -211,7 +211,7 @@ class StringValidator implements BaseValidator
         // 1 必填校验
         $this->required($columnName);
         // 2 格式校验
-        $this->string($columnName);
+        $this->format($columnName);
         // 3 最大长度校验
         $this->maxLength($columnName);
         // 4 最小长度校验
