@@ -63,7 +63,7 @@ class Validator
      */
     public static function autoload($className)
     {
-        $classfile = './'.$className.'.php';
+        $classfile = __DIR__.'/'.$className.'.php';
         require_once($classfile);
         return;
     }

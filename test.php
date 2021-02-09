@@ -1,6 +1,6 @@
 <?php
 
-include("./Validator.php");
+include("./src/Validator.php");
 
 $rules = [
     'chnname'  => ['format' => 'string', 'required' => true, 'maxLength' => 10, 'filter' => ['trim', 'filterSpace'], 'default' => ''],
