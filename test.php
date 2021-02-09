@@ -1,9 +1,7 @@
 <?php
 
-
 include("./Validator.php");
 
-// "required|length:6,16",
 $rules = [
     'chnname'  => ['format' => 'string', 'required' => true, 'maxLength' => 2, 'filter' => ['trim', 'filterSpace'], 'default' => ''],
     'birthday'   => ['format' => 'date', 'required' => false, 'layout' => 'Y-m-d', 'default' => null],
