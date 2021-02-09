@@ -150,7 +150,28 @@ class FloatValidator implements BaseValidator
         return;
     }
 
-
+    /**
+     * 浮点型格式化
+     *
+     * @param string $columnName
+     * @return void
+     */
+    protected function layout($columnName){
+        if(isset($this->params[$columnName])){
+            if( isset($this->rules[$columnName]['layout'])){
+                switch ($this->rules[$columnName]['layout']) {
+                    case '0.00':
+                        $this->params[$columnName] = sprintf("%.2f",$this->params[$columnName]);
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+            }
+        }
+        return;
+    }
+    
 
     /**
      * 获取验证后的数据
@@ -187,6 +208,8 @@ class FloatValidator implements BaseValidator
         $this->max($columnName);
         // 4 最小数值校验
         $this->min($columnName);
+        // 5 格式化
+        $this->layout($columnName);
         return;
     }
 }

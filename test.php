@@ -7,7 +7,7 @@ $rules = [
     'birthday'   => ['format' => 'dateTime', 'required' => false, 'layout' => 'Y-m-d', 'default' => null],
     'contracte_mail' => ['format' => 'email', 'minLength' => 3, 'maxLength' => 100], //'length' => 100, 
     'phone_number' => ['format' => 'phone', 'maxLength' => 15, 'filter' => ['trim']],
-    'money' => ['format' => 'int', 'max' => 5, 'min' => 1],
+    'money' => ['format' => 'float', 'max' => 5, 'min' => 1,'layout' => '0.00'],
     'hhh' => ['format' => 'range', 'required' => true, 'range' => ['Y', 'N'],],
     'zzz' => ['format' => 'regex', 'regex' => '/\d+/', 'required' => false, 'range' => ['Y', 'N'],],
 ];
@@ -26,6 +26,7 @@ $params = array(
     "birthday" => "2020-12-02 10:36:01",
     "contracte_mail" => "123456@qq.com",
     "phone_number" => "1882623366",
+    "money" =>'120',
     'hhh' => 'Z',
     'zzz' => 'Z',
 );
