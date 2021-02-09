@@ -51,6 +51,9 @@ class Validator
             return [];
         }
         $this->originParams = $params;
+        $this->settionRulesMsg = $msgs;
+        $this->error = array();
+        $this->formatedParams = array();
         // 默认零值
         foreach ($rules as $columnName => $validatorRuleMap) {
             foreach ($validatorRuleMap as $ruleTag => $ruleValue) {
@@ -99,8 +102,12 @@ class Validator
             $this->setItemErrorMsg($columnName,'format');
         }
         if(isset($this->originParams[$columnName]) 
-            && ($this->settionRulesMap['maxLength'][$columnName] 
-            && strlen($this->originParams[$columnName])>$this->settionRulesMap['maxLength'][$columnName])
+            && 
+            (
+                $this->settionRulesMap['maxLength'][$columnName]  
+                && 
+                strlen($this->originParams[$columnName])>$this->settionRulesMap['maxLength'][$columnName]
+            )
         ){
             $this->setItemErrorMsg($columnName,'maxLength');
         }
@@ -143,16 +150,15 @@ class Validator
         // 5 格式化-默认空值处理
     }
 
-
     // 设置错误信息
     public function setItemErrorMsg($columnName,$errorTag){
         if(isset($this->settionRulesMsg[$columnName]) && !empty($this->settionRulesMsg[$columnName][$errorTag])){
             $this->error[] = $this->settionRulesMsg[$columnName][$errorTag];
         }else{
-            if(isset($this->defaultErrorTips[$columnName]) && !empty($this->defaultErrorTips[$columnName][$errorTag])){
-                $this->error[] = $this->defaultErrorTips[$columnName][$errorTag];
+            if(isset($this->defaultErrorTips[$errorTag]) && !empty($this->defaultErrorTips[$errorTag])){
+                $this->error[] = $this->defaultErrorTips[$errorTag];
             }else{
-                $this->error[] = $columnName.'-'.$errorTag;
+                $this->error[] = $columnName.' error '.$errorTag;
             }
         }
         return true;
@@ -160,9 +166,6 @@ class Validator
 
 
     // 设置零值
-
-
-
     public function setItemZero($columnName,$format){
         if(isset($this->settionRulesMap['default'][$columnName]) && !empty($this->settionRulesMap['default'][$columnName])){
             $this->formatedParams[$columnName] = $this->settionRulesMap['default'][$columnName];
