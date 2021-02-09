@@ -8,8 +8,8 @@ $rules = [
     'contracte_mail' => ['format' => 'email', 'minLength' => 3, 'maxLength' => 100], //'length' => 100, 
     'phone_number' => ['format' => 'phone', 'maxLength' => 15, 'filter' => ['trim']],
     'money' => ['format' => 'int', 'max' => 5, 'min' => 1],
-    'hhh' => ['format' => 'range','required' => true, 'range' => ['Y','N'],],
-    'zzz' => ['format' => 'regex','regex'=>'/\d+/','required' => false, 'range' => ['Y','N'],],
+    'hhh' => ['format' => 'range', 'required' => true, 'range' => ['Y', 'N'],],
+    'zzz' => ['format' => 'regex', 'regex' => '/\d+/', 'required' => false, 'range' => ['Y', 'N'],],
 ];
 
 $msgs = array(
