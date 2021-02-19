@@ -15,7 +15,7 @@
     "require":{
     	"php": ">=7.0.0"
     },
-    "minimum-stability":"dev",
+    "minimum-stability":"main",
     "autoload":{
         "psr-4":{
             "xuweiqiang/validator\\":"src"
