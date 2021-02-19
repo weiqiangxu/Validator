@@ -1,3 +1,3 @@
-# validater
+# validator
 
 PHP验证器
