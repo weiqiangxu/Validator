@@ -1,6 +1,6 @@
 {
-    "name":"xuweiqiang/easy-validator",
-    "description":"a simple validator.",
+    "name":"xuweiqiang/validator",
+    "description":"validator",
     "keywords":[
         "validator",
         "extension"
@@ -18,7 +18,7 @@
     "minimum-stability":"dev",
     "autoload":{
         "psr-4":{
-            "xuweiqiang/easy-validator":"src"
+            "xuweiqiang/validator":"src"
         }
     }
 }

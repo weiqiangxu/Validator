@@ -1,6 +1,6 @@
 <?php
 
-namespace xuweiqiang\EasyValidator;
+namespace xuweiqiang\validator;
 
 /**
  * 验证器
