@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyValidater;
+namespace xuweiqiang\EasyValidator;
 
 /**
  * 抽象接口 - 单一验证器

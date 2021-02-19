@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyValidater;
+namespace xuweiqiang\EasyValidator;
 
 /**
  * DateValidator

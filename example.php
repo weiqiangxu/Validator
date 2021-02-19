@@ -2,7 +2,7 @@
 
 include("./src/Validator.php");
 
-use EasyValidater\Validator;
+use xuweiqiang\EasyValidator\Validator;
 
 $rules = [
     'chnname'  => ['format' => 'string', 'required' => true, 'maxLength' => 10, 'filter' => ['trim', 'filterSpace'], 'default' => ''],
