@@ -1,5 +1,7 @@
 <?php
 
+namespace EasyValidater;
+
 /**
  * IntegerValidator
  * @author wytanxu@tencent.com

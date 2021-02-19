@@ -1,5 +1,7 @@
 <?php
 
+namespace EasyValidater;
+
 /**
  * RangeValidator
  * @author wytanxu@tencent.com

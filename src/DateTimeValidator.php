@@ -1,5 +1,7 @@
 <?php
 
+namespace EasyValidater;
+
 /**
  * DateTimeValidator
  * @author wytanxu@tencent.com

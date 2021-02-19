@@ -1,5 +1,6 @@
 <?php
 
+namespace EasyValidater;
 
 /**
  * 抽象接口 - 单一验证器

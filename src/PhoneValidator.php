@@ -1,5 +1,7 @@
 <?php
 
+namespace EasyValidater;
+
 /**
  * PhoneValidator
  * @author wytanxu@tencent.com

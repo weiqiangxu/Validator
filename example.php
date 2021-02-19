@@ -2,6 +2,8 @@
 
 include("./src/Validator.php");
 
+use EasyValidater\Validator;
+
 $rules = [
     'chnname'  => ['format' => 'string', 'required' => true, 'maxLength' => 10, 'filter' => ['trim', 'filterSpace'], 'default' => ''],
     'birthday'   => ['format' => 'dateTime', 'required' => false, 'layout' => 'Y-m-d', 'default' => null],

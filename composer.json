@@ -1,0 +1,24 @@
+{
+    "name":"wystanxu/EasyValidater",
+    "description":"a simple validator.",
+    "keywords":[
+        "validator",
+        "extension"
+    ],
+    "type":"php-extension",
+    "authors":[
+        {
+            "name":"wystanxu",
+            "email":"435861851@qq.com",
+        }
+    ],
+    "require":{
+    	"php": ">=7.0.0"
+    },
+    "minimum-stability":"dev",
+    "autoload":{
+        "psr-4":{
+            "wystanxu/EasyValidater":"src"
+        }
+    }
+}

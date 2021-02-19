@@ -1,5 +1,7 @@
 <?php
 
+namespace EasyValidater;
+
 /**
  * 验证器
  */
@@ -63,7 +65,7 @@ class Validator
      */
     public static function autoload($className)
     {
-        $classfile = __DIR__.'/'.$className.'.php';
+        $classfile = __DIR__.'/'.basename($className).'.php';
         require_once($classfile);
         return;
     }

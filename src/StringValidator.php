@@ -1,5 +1,7 @@
 <?php
 
+namespace EasyValidater;
+
 /**
  * StringValidator类
  * @author wytanxu@tencent.com
