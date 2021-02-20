@@ -19,6 +19,7 @@ class Validator
         'range' => RangeValidator::class,
         'float' => FloatValidator::class,
         'regex' => RegexValidator::class,
+        'email' => EmailValidator::class,
     ];
 
     /**
@@ -93,8 +94,7 @@ class Validator
             }
             # 逐行校验
             if (!isset($this->_validators[$validatorRuleMap['format']])) {
-                continue;
-                throw new Exception("验证类型 {$validatorRuleMap['format']} 不存在");
+                throw new \Exception("验证类型 {$validatorRuleMap['format']} 不存在");
                 break;
             }
             // 调用对应类型的验证器

@@ -62,7 +62,7 @@ class RangeValidator implements BaseValidator
                 case 'required':
                     $error = '字段值不能为空';
                     break;
-                case 'format':
+                case 'range':
                     $error = '字段值超出范围';
                     break;
                 default:
@@ -106,7 +106,7 @@ class RangeValidator implements BaseValidator
                 is_array($this->rules[$columnName]['range'])
             ){
                 if(!in_array($this->params[$columnName],$this->rules[$columnName]['range'])){
-                    $this->setError($columnName,"format");
+                    $this->setError($columnName,"range");
                 }
             }
         }
