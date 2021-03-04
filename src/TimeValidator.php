@@ -3,10 +3,10 @@
 namespace xuweiqiang\validator;
 
 /**
- * DateValidator
+ * TimeValidator
  * @author wytanxu@tencent.com
  */
-class DateValidator implements BaseValidator
+class TimeValidator implements BaseValidator
 {
 
     /**
@@ -129,14 +129,23 @@ class DateValidator implements BaseValidator
                 &&
                 boolval($this->rules[$columnName]['required'])
             ) {
-                if (!$this->checkDateFormat($this->params[$columnName])) {
+                if (
+                    !$this->checkDateFormat($this->params[$columnName])
+                    &&
+                    !$this->checkDateTimeFormat($this->params[$columnName])
+                ) {
                     $this->setError($columnName, 'format');
                 }
             } else {
                 // 非必填不为空才会校验
-                if (!empty($this->params[$columnName]) && !$this->checkDateFormat($this->params[$columnName])) {
-                    var_dump($columnName);
-                    $this->setError($columnName, 'format');
+                if (!empty($this->params[$columnName])) {
+                    if (
+                        !$this->checkDateFormat($this->params[$columnName])
+                        &&
+                        !$this->checkDateTimeFormat($this->params[$columnName])
+                    ) {
+                        $this->setError($columnName, 'format');
+                    }
                 }
             }
         }
@@ -150,15 +159,13 @@ class DateValidator implements BaseValidator
     protected function setDefault($columnName)
     {
         if (isset($this->params[$columnName])) {
-            if (in_array('default', array_keys($this->rules[$columnName]))) {
-                var_dump($this->params[$columnName] == "");
+            if(in_array('default',array_keys($this->rules[$columnName]))){
                 if (
                     $this->params[$columnName] == ""
                     || $this->params[$columnName] === false
                     || $this->params[$columnName] == "0"
                 ) {
                     $this->params[$columnName] = $this->rules[$columnName]['default'];
-                    var_dump($this->params[$columnName]);
                 }
             }
         }
@@ -233,6 +240,23 @@ class DateValidator implements BaseValidator
         } else {
             return false;
         }
+    }
+
+
+    /**
+     * 校验日期格式
+     *
+     * @param string $date
+     * @link https://www.runoob.com/w3cnote/date-format-validation-in-php.html
+     * @return void
+     */
+    function checkDateTimeFormat($date)
+    {
+        $dateTime = date_create($date);
+        if (!$dateTime || $date != date_format($dateTime, 'Y-m-d H:i:s')) {
+            return false;
+        }
+        return true;
     }
 
     /**

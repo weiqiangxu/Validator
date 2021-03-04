@@ -89,10 +89,17 @@ class DateTimeValidator implements BaseValidator
             isset($this->rules[$columnName]['required'])
             &&
             boolval($this->rules[$columnName]['required'])
-            &&
-            !isset($this->params[$columnName])
+            
         ) {
-            $this->setError($columnName, 'required');
+            if(!isset($this->params[$columnName])){
+                // 键值不存在 - 直接抛出必填项缺失
+                $this->setError($columnName, 'required');
+            }else {
+                // 如果零值则触发必填项缺失
+                if(empty($this->params[$columnName])){
+                    $this->setError($columnName, 'required');
+                }
+            }
         }
         return;
     }
@@ -106,9 +113,24 @@ class DateTimeValidator implements BaseValidator
     protected function format($columnName)
     {
         if (isset($this->params[$columnName])) {
-            if(!$this->checkDateTimeFormat($this->params[$columnName])){
-                $this->setError($columnName, 'format');
+            if(
+                isset($this->rules[$columnName]['required'])
+                &&
+                boolval($this->rules[$columnName]['required'])
+            ){
+                // 必填项强制格式校验
+                if(!$this->checkDateTimeFormat($this->params[$columnName])){
+                    $this->setError($columnName, 'format');
+                }
+            }else{
+                // 非必填项 - 非空 - 做格式校验
+                if(!empty($this->params[$columnName])){
+                    if(!$this->checkDateTimeFormat($this->params[$columnName])){
+                        $this->setError($columnName, 'format');
+                    }
+                }
             }
+
         }
         return;
     }
@@ -222,6 +244,25 @@ class DateTimeValidator implements BaseValidator
         return $this->error;
     }
 
+    /**
+     * 设置默认零值
+     * @return void
+     */
+    protected function setDefault($columnName)
+    {
+        if (isset($this->params[$columnName])) {
+            if(in_array('default',array_keys($this->rules[$columnName]))){
+                if (
+                    $this->params[$columnName] == ""
+                    || $this->params[$columnName] === false
+                    || $this->params[$columnName] == "0"
+                ) {
+                    $this->params[$columnName] = $this->rules[$columnName]['default'];
+                }
+            }
+        }
+        return;
+    }
 
     /**
      * 校验
@@ -235,11 +276,13 @@ class DateTimeValidator implements BaseValidator
         $this->required($columnName);
         // 2 格式校验
         $this->format($columnName);
-        // 3 最大数值校验
+        // 3 默认零值
+        $this->setDefault($columnName);
+        // 4 最大数值校验
         $this->max($columnName);
-        // 4 最小数值校验
+        // 5 最小数值校验
         $this->min($columnName);
-        // 5 格式化
+        // 6 格式化
         $this->layout($columnName);
         return;
     }

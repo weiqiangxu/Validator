@@ -123,7 +123,7 @@ class StringValidator implements BaseValidator
             (
                 !empty($this->rules[$columnName]['maxLength'])
                 && 
-                strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength']
+                mb_strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength']
             )
         ){
             $this->setError($columnName,'maxLength');
