@@ -20,7 +20,6 @@ class Validator
         'float' => FloatValidator::class,
         'regex' => RegexValidator::class,
         'email' => EmailValidator::class,
-        'time' => TimeValidator::class,
     ];
 
     /**
@@ -67,7 +66,6 @@ class Validator
      */
     public static function autoload($className)
     {
-        $className = basename(str_replace('\\', '/', $className));
         $classfile = __DIR__.'/'.basename($className).'.php';
         require_once($classfile);
         return;
@@ -87,15 +85,9 @@ class Validator
         if (empty($rules)) {
             return $params;
         }
-        $ruleColumnList = array_keys($rules);
-        foreach ($params as $columnName => $columnValue) {
-            if(!in_array($columnName,$ruleColumnList)){
-                unset($params[$columnName]);
-            }
-        }
+        $this->params = $params;
         $this->rules = $rules;
         $this->msgs = $msgs;
-        $this->params = $params;
         foreach ($rules as $columnName => $validatorRuleMap) {
             if(empty($validatorRuleMap['format'])){
                 continue;
@@ -110,8 +102,7 @@ class Validator
             $validator = new $validatorClass($this);
             $validator->validate($columnName);
             $this->error = array_merge($this->error, $validator->getError());
-            if(in_array($columnName,array_keys($this->params))){
-                // 必须校验数据源存在该键 - 才会拼接格式化后的值
+            if (!empty($this->params[$columnName])) {
                 $this->params[$columnName] = $validator->getParam($columnName);
             }
         }

@@ -89,27 +89,10 @@ class DateValidator implements BaseValidator
             isset($this->rules[$columnName]['required'])
             &&
             boolval($this->rules[$columnName]['required'])
+            &&
+            !isset($this->params[$columnName])
         ) {
-            if (!isset($this->params[$columnName])) {
-                $this->setError($columnName, 'required');
-            } else {
-                switch ($this->params[$columnName]) {
-                    case false:
-                        $this->setError($columnName, 'required');
-                        break;
-                    case null:
-                        $this->setError($columnName, 'required');
-                        break;
-                    case "":
-                        $this->setError($columnName, 'required');
-                        break;
-                    case 0:
-                        $this->setError($columnName, 'required');
-                        break;
-                    default:
-                        break;
-                }
-            }
+            $this->setError($columnName, 'required');
         }
         return;
     }
@@ -118,53 +101,17 @@ class DateValidator implements BaseValidator
 
     /**
      * 格式校验
-     * 
      * @return void
      */
     protected function format($columnName)
     {
         if (isset($this->params[$columnName])) {
-            if (
-                isset($this->rules[$columnName]['required'])
-                &&
-                boolval($this->rules[$columnName]['required'])
-            ) {
-                if (!$this->checkDateFormat($this->params[$columnName])) {
-                    $this->setError($columnName, 'format');
-                }
-            } else {
-                // 非必填不为空才会校验
-                if (!empty($this->params[$columnName]) && !$this->checkDateFormat($this->params[$columnName])) {
-                    var_dump($columnName);
-                    $this->setError($columnName, 'format');
-                }
+            if(!$this->checkDateFormat($this->params[$columnName])){
+                $this->setError($columnName, 'format');
             }
         }
         return;
     }
-
-    /**
-     * 设置默认零值
-     * @return void
-     */
-    protected function setDefault($columnName)
-    {
-        if (isset($this->params[$columnName])) {
-            if (in_array('default', array_keys($this->rules[$columnName]))) {
-                var_dump($this->params[$columnName] == "");
-                if (
-                    $this->params[$columnName] == ""
-                    || $this->params[$columnName] === false
-                    || $this->params[$columnName] == "0"
-                ) {
-                    $this->params[$columnName] = $this->rules[$columnName]['default'];
-                    var_dump($this->params[$columnName]);
-                }
-            }
-        }
-        return;
-    }
-
 
     /**
      * 日期最大值校验
@@ -230,7 +177,7 @@ class DateValidator implements BaseValidator
                 return true;
             else
                 return false;
-        } else {
+        } else{
             return false;
         }
     }
@@ -289,17 +236,15 @@ class DateValidator implements BaseValidator
      */
     public function validate($columnName)
     {
-        // 1 零值校验
-        $this->setDefault($columnName);
-        // 2 必填校验
+        // 1 必填校验
         $this->required($columnName);
-        // 3 格式校验
+        // 2 格式校验
         $this->format($columnName);
-        // 4 最大数值校验
+        // 3 最大数值校验
         $this->max($columnName);
-        // 5 最小数值校验
+        // 4 最小数值校验
         $this->min($columnName);
-        // 6 格式化
+        // 5 格式化
         $this->layout($columnName);
         return;
     }

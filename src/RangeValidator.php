@@ -82,16 +82,11 @@ class RangeValidator implements BaseValidator
         if (
             isset($this->rules[$columnName]['required'])
             &&
-            boolval($this->rules[$columnName]['required'])            
+            boolval($this->rules[$columnName]['required'])
+            &&
+            !isset($this->params[$columnName])
         ) {
-            if(!isset($this->params[$columnName])){
-                // 键值都不存在
-                $this->setError($columnName, 'required');
-            }else{
-                if(empty($this->params[$columnName])){
-                    $this->setError($columnName, 'required');
-                }
-            }
+            $this->setError($columnName, 'required');
         }
         return;
     }
@@ -105,34 +100,13 @@ class RangeValidator implements BaseValidator
     protected function format($columnName)
     {
         if (isset($this->params[$columnName]) ) {
-
-            if (
-                isset($this->rules[$columnName]['required'])
+            if(
+                !empty($this->rules[$columnName]['range'])
                 &&
-                boolval($this->rules[$columnName]['required'])            
-            ) {
-                // 必填项 - 空值等都要格式校验
-                if(
-                    !empty($this->rules[$columnName]['range'])
-                    &&
-                    is_array($this->rules[$columnName]['range'])
-                ){
-                    if(!in_array($this->params[$columnName],$this->rules[$columnName]['range'])){
-                        $this->setError($columnName,"range");
-                    }
-                }
-            }else{
-                if($this->params[$columnName] != ''){
-                    // 枚举值 - 对于空字符串 + 非必填 不抛出格式错误 
-                    if(
-                        !empty($this->rules[$columnName]['range'])
-                        &&
-                        is_array($this->rules[$columnName]['range'])
-                    ){
-                        if(!in_array($this->params[$columnName],$this->rules[$columnName]['range'])){
-                            $this->setError($columnName,"range");
-                        }
-                    }
+                is_array($this->rules[$columnName]['range'])
+            ){
+                if(!in_array($this->params[$columnName],$this->rules[$columnName]['range'])){
+                    $this->setError($columnName,"range");
                 }
             }
         }
