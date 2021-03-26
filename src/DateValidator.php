@@ -81,18 +81,15 @@ class DateValidator implements BaseValidator
 
     /**
      * 必需验证
+     * 
      * @return void
      */
     protected function required($columnName)
     {
-        if (
-            isset($this->rules[$columnName]['required'])
-            &&
-            boolval($this->rules[$columnName]['required'])
-            &&
-            !isset($this->params[$columnName])
-        ) {
-            $this->setError($columnName, 'required');
+        if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+            if (!isset($this->params[$columnName]) || $this->params[$columnName] == '') {
+                $this->setError($columnName, 'required');
+            }
         }
         return;
     }
@@ -101,17 +98,48 @@ class DateValidator implements BaseValidator
 
     /**
      * 格式校验
+     * 
      * @return void
      */
     protected function format($columnName)
     {
         if (isset($this->params[$columnName])) {
-            if(!$this->checkDateFormat($this->params[$columnName])){
-                $this->setError($columnName, 'format');
+            if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+                // 必填项
+                if ($this->params[$columnName] != '') {
+                    if (!$this->checkDateFormat($this->params[$columnName])) {
+                        $this->setError($columnName, 'format');
+                    }
+                }
+            } else {
+                // 非必填不为空才会校验
+                if ($this->params[$columnName] != '') {
+                    if (!$this->checkDateFormat($this->params[$columnName])) {
+                        $this->setError($columnName, 'format');
+                    }
+                }
             }
         }
         return;
     }
+
+    /**
+     * 设置默认零值
+     * @return void
+     */
+    protected function setDefault($columnName)
+    {
+        if (isset($this->params[$columnName])) {
+            if ($this->rules[$columnName] == '') {
+                // 规则有默认零值
+                if (in_array('default', array_keys($this->rules[$columnName]))) {
+                    $this->params[$columnName] = $this->rules[$columnName]['default'];
+                }
+            }
+        }
+        return;
+    }
+
 
     /**
      * 日期最大值校验
@@ -121,18 +149,12 @@ class DateValidator implements BaseValidator
      */
     protected function max($columnName)
     {
-        if (
-            isset($this->params[$columnName])
-            &&
-            strtotime($this->params[$columnName])
-            &&
-            (!empty($this->rules[$columnName]['max'])
-                &&
-                strtotime($this->rules[$columnName]['max'])
-                &&
-                strtotime($this->params[$columnName]) > strtotime($this->rules[$columnName]['max']))
-        ) {
-            $this->setError($columnName, 'max');
+        if (isset($this->params[$columnName]) && strtotime($this->params[$columnName])) {
+            if (!empty($this->rules[$columnName]['max']) && strtotime($this->rules[$columnName]['max'])) {
+                if (strtotime($this->params[$columnName]) > strtotime($this->rules[$columnName]['max'])) {
+                    $this->setError($columnName, 'max');
+                }
+            }
         }
         return;
     }
@@ -145,18 +167,12 @@ class DateValidator implements BaseValidator
      */
     protected function min($columnName)
     {
-        if (
-            isset($this->params[$columnName])
-            &&
-            strtotime($this->params[$columnName])
-            &&
-            (!empty($this->rules[$columnName]['min'])
-                &&
-                strtotime($this->rules[$columnName]['min'])
-                &&
-                strtotime($this->params[$columnName]) < strtotime($this->rules[$columnName]['min']))
-        ) {
-            $this->setError($columnName, 'min');
+        if (isset($this->params[$columnName]) && strtotime($this->params[$columnName])) {
+            if (!empty($this->rules[$columnName]['min']) && strtotime($this->rules[$columnName]['min'])) {
+                if (strtotime($this->params[$columnName]) < strtotime($this->rules[$columnName]['min'])) {
+                    $this->setError($columnName, 'min');
+                }
+            }
         }
         return;
     }
@@ -177,7 +193,7 @@ class DateValidator implements BaseValidator
                 return true;
             else
                 return false;
-        } else{
+        } else {
             return false;
         }
     }
@@ -190,16 +206,10 @@ class DateValidator implements BaseValidator
      */
     protected function layout($columnName)
     {
-        if (
-            isset($this->params[$columnName])
-            &&
-            strtotime($this->params[$columnName])
-            &&
-            !empty($this->rules[$columnName]['layout'])
-            &&
-            empty($this->error)
-        ) {
-            $this->params[$columnName] = date($this->rules[$columnName]['layout'], strtotime($this->params[$columnName]));
+        if (isset($this->params[$columnName]) && $this->checkDateFormat($this->params[$columnName])) {
+            if (!empty($this->rules[$columnName]['layout'])) {
+                $this->params[$columnName] = date($this->rules[$columnName]['layout'], strtotime($this->params[$columnName]));
+            }
         }
         return;
     }
@@ -230,21 +240,28 @@ class DateValidator implements BaseValidator
 
     /**
      * 校验
-     *
+     * 1.必填项 - 传递null或者空字符串都会告警不能为空 | 不告警格式错误
+     * 2.格式化 - 必须为正确的时间格式 - 才会执行layout格式化
+     * 3.格式校验 - 必填项为非字符串非null校验格式 | 非必填项非空字符串非null校验格式
+     * 4.默认值 - 必填项不做处理|非必填项为null或空字符串时候置为默认零值 
+     * 
+     * 
      * @param string $columnName
      * @return void
      */
     public function validate($columnName)
     {
-        // 1 必填校验
+        // 1 零值校验
+        $this->setDefault($columnName);
+        // 2 必填校验
         $this->required($columnName);
-        // 2 格式校验
+        // 3 格式校验
         $this->format($columnName);
-        // 3 最大数值校验
+        // 4 最大数值校验
         $this->max($columnName);
-        // 4 最小数值校验
+        // 5 最小数值校验
         $this->min($columnName);
-        // 5 格式化
+        // 6 格式化
         $this->layout($columnName);
         return;
     }

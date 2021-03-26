@@ -82,14 +82,10 @@ class RegexValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if(
-            isset($this->rules[$columnName]['required'])
-            && 
-            boolval($this->rules[$columnName]['required'])
-            && 
-            !isset($this->params[$columnName])  
-        ){
-            $this->setError($columnName,'required');
+        if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+            if (!isset($this->params[$columnName])  || $this->params[$columnName] == '') {
+                $this->setError($columnName, 'required');
+            }
         }
         return;
     }
@@ -102,16 +98,15 @@ class RegexValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName])){
-            if(empty($this->rules[$columnName]['regex'])){
-                $this->setError($columnName,'regex');
-            }
-            if(
-                !empty($this->rules[$columnName]['regex'])
-                &&
-                !preg_match($this->rules[$columnName]['regex'],$this->params[$columnName])
-            ){
-                $this->setError($columnName,'format');
+        if (isset($this->params[$columnName])) {
+            if (empty($this->rules[$columnName]['regex']) || !is_string($this->rules[$columnName]['regex'])) {
+                $this->setError($columnName, 'regex');
+            } else {
+                if ($this->params[$columnName] != '') {
+                    if (!preg_match($this->rules[$columnName]['regex'], $this->params[$columnName])) {
+                        $this->setError($columnName, 'format');
+                    }
+                }
             }
         }
         return;
@@ -123,16 +118,13 @@ class RegexValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function maxLength($columnName){
-        if(isset($this->params[$columnName]) 
-            && 
-            (
-                !empty($this->rules[$columnName]['maxLength'])
-                && 
-                strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength']
-            )
-        ){
-            $this->setError($columnName,'maxLength');
+    protected function maxLength($columnName)
+    {
+        if (
+            isset($this->params[$columnName])
+            && (!empty($this->rules[$columnName]['maxLength']) && strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength'])
+        ) {
+            $this->setError($columnName, 'maxLength');
         }
         return;
     }
@@ -143,15 +135,12 @@ class RegexValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function minLength($columnName){
-        if(isset($this->params[$columnName])){
-            if( 
-                isset($this->rules[$columnName]['minLength']) 
-                && 
-                strlen($this->params[$columnName]) > $this->rules[$columnName]['minLength']
-            ){
-                $this->setError($columnName,'minLength');
-            }            
+    protected function minLength($columnName)
+    {
+        if (isset($this->params[$columnName])) {
+            if (!empty($this->rules[$columnName]['minLength']) && strlen($this->params[$columnName]) > $this->rules[$columnName]['minLength']) {
+                $this->setError($columnName, 'minLength');
+            }
         }
         return;
     }
@@ -162,14 +151,15 @@ class RegexValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function filter($columnName){
-        if(empty($this->rules[$columnName]["filter"])){
+    protected function filter($columnName)
+    {
+        if (empty($this->rules[$columnName]["filter"])) {
             return;
         }
-        if(!is_array($this->rules[$columnName]["filter"])){
+        if (!is_array($this->rules[$columnName]["filter"])) {
             return;
         }
-        if(!empty($this->error)){
+        if (!empty($this->error)) {
             return;
         }
         foreach ($this->rules[$columnName]["filter"] as $func) {
@@ -178,7 +168,7 @@ class RegexValidator implements BaseValidator
                     $this->params[$columnName] = trim($this->params[$columnName]);
                     break;
                 case 'filterSpace':
-                    $this->params[$columnName] = str_replace(' ','',$this->params[$columnName]);
+                    $this->params[$columnName] = str_replace(' ', '', $this->params[$columnName]);
                     break;
                 default:
                     # code...
@@ -195,7 +185,8 @@ class RegexValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function getParam($columnName){
+    public function getParam($columnName)
+    {
         return $this->params[$columnName];
     }
 
@@ -204,7 +195,8 @@ class RegexValidator implements BaseValidator
      *
      * @return array
      */
-    public function getError(){
+    public function getError()
+    {
         return $this->error;
     }
 
@@ -215,7 +207,8 @@ class RegexValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function validate($columnName){
+    public function validate($columnName)
+    {
         // 1 必填校验
         $this->required($columnName);
         // 2 格式校验
@@ -226,7 +219,6 @@ class RegexValidator implements BaseValidator
         $this->minLength($columnName);
         // 5 格式化函数处理
         $this->filter($columnName);
-        
         return;
     }
 }

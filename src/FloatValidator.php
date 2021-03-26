@@ -85,14 +85,10 @@ class FloatValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if(
-            isset($this->rules[$columnName]['required'])
-            && 
-            boolval($this->rules[$columnName]['required'])
-            && 
-            !isset($this->params[$columnName])
-        ){
-            $this->setError($columnName,'required');
+        if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+            if(!isset($this->params[$columnName]) || $this->params[$columnName]=='' ){
+                $this->setError($columnName, 'required');
+            }
         }
         return;
     }
@@ -105,9 +101,17 @@ class FloatValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName])){
-            if(!preg_match('/^[-]{0,1}[0-9]+[.][0-9]+$|^[-]{0,1}[0-9]$/i', $this->params[$columnName])){
-                $this->setError($columnName,'format');
+        if (isset($this->params[$columnName])) {
+            if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+                // 必填
+                if($this->params[$columnName] != '' && filter_var($this->params[$columnName], FILTER_VALIDATE_FLOAT) === false ){
+                    $this->setError($columnName, 'format');
+                }
+            }else{
+                // 非必填
+                if($this->params[$columnName] != '' && filter_var($this->params[$columnName], FILTER_VALIDATE_FLOAT) === false ){
+                    $this->setError($columnName, 'format');
+                }
             }
         }
         return;
@@ -119,16 +123,13 @@ class FloatValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function max($columnName){
-        if(isset($this->params[$columnName])
-            && 
-            (
-                !empty($this->rules[$columnName]['max'])
-                && 
-                intval($this->params[$columnName]) > $this->rules[$columnName]['max']
-            )
-        ){
-            $this->setError($columnName,'max');
+    protected function max($columnName)
+    {
+        if (
+            isset($this->params[$columnName]) &&
+            (!empty($this->rules[$columnName]['max']) && floatval($this->params[$columnName]) > $this->rules[$columnName]['max'])
+        ) {
+            $this->setError($columnName, 'max');
         }
         return;
     }
@@ -139,15 +140,16 @@ class FloatValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function min($columnName){
-        if(isset($this->params[$columnName])){
-            if( 
-                isset($this->rules[$columnName]['min']) 
-                && 
+    protected function min($columnName)
+    {
+        if (isset($this->params[$columnName])) {
+            if (
+                isset($this->rules[$columnName]['min'])
+                &&
                 intval($this->params[$columnName]) < intval($this->rules[$columnName]['min'])
-            ){
-                $this->setError($columnName,'min');
-            }            
+            ) {
+                $this->setError($columnName, 'min');
+            }
         }
         return;
     }
@@ -155,25 +157,20 @@ class FloatValidator implements BaseValidator
     /**
      * 浮点型格式化
      *
-     * @param string $columnName
+     * 
+     * @param string $columnName %.2f | %.1f
      * @return void
      */
-    protected function layout($columnName){
-        if(isset($this->params[$columnName])){
-            if( isset($this->rules[$columnName]['layout'])){
-                switch ($this->rules[$columnName]['layout']) {
-                    case '0.00':
-                        $this->params[$columnName] = sprintf("%.2f",$this->params[$columnName]);
-                        break;
-                    default:
-                        # code...
-                        break;
-                }
+    protected function layout($columnName)
+    {
+        if (isset($this->params[$columnName])) {
+            if (isset($this->rules[$columnName]['layout']) && $this->params[$columnName]!='') {
+                $this->params[$columnName] = sprintf($this->rules[$columnName]['layout'], $this->params[$columnName]);
             }
         }
         return;
     }
-    
+
 
     /**
      * 获取验证后的数据
@@ -181,7 +178,8 @@ class FloatValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function getParam($columnName){
+    public function getParam($columnName)
+    {
         return $this->params[$columnName];
     }
 
@@ -190,7 +188,8 @@ class FloatValidator implements BaseValidator
      *
      * @return array
      */
-    public function getError(){
+    public function getError()
+    {
         return $this->error;
     }
 
@@ -201,7 +200,8 @@ class FloatValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function validate($columnName){
+    public function validate($columnName)
+    {
         // 1 必填校验
         $this->required($columnName);
         // 2 格式校验

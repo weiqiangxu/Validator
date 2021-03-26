@@ -85,14 +85,15 @@ class IntegerValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if(
+        if (
             isset($this->rules[$columnName]['required'])
-            && 
+            &&
             boolval($this->rules[$columnName]['required'])
-            && 
-            !isset($this->params[$columnName])
-        ){
-            $this->validatorObj->setError($columnName,'required');
+        ) {
+            if (!isset($this->params[$columnName]) || $this->params[$columnName] == '') {
+                // 键不存在
+                $this->setError($columnName, 'required');
+            }
         }
         return;
     }
@@ -105,8 +106,26 @@ class IntegerValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if(isset($this->params[$columnName]) && preg_grep("/^[-]{0,1}[0-9]+$/",$this->params[$columnName])){
-            $this->setError($columnName,'format');
+        if (isset($this->params[$columnName])) {
+            if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+                // 必填项
+                if ($this->params[$columnName] != '') {
+                    if (filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false) {
+                        $this->setError($columnName, 'format');
+                    }else{
+                        $this->params[$columnName] = filter_var($this->params[$columnName], FILTER_VALIDATE_INT);
+                    }
+                }
+            } else {
+                // 非必填项
+                if ($this->params[$columnName] != '') {
+                    if (filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false) {
+                        $this->setError($columnName, 'format');
+                    } else {
+                        $this->params[$columnName] = filter_var($this->params[$columnName], FILTER_VALIDATE_INT);
+                    }
+                }
+            }
         }
         return;
     }
@@ -117,16 +136,14 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function max($columnName){
-        if(isset($this->params[$columnName])
-            && 
-            (
-                !empty($this->rules[$columnName]['max'])
-                && 
-                intval($this->params[$columnName]) > $this->rules[$columnName]['max']
-            )
-        ){
-            $this->setError($columnName,'max');
+    protected function max($columnName)
+    {
+        if ( isset($this->params[$columnName]) && !empty($this->rules[$columnName]['max']) ) {
+            if(!(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false)){
+                if(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) > $this->rules[$columnName]['max']){
+                    $this->setError($columnName, 'max');
+                }
+            }
         }
         return;
     }
@@ -137,20 +154,33 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    protected function min($columnName){
-        if(isset($this->params[$columnName])){
-            if( 
-                isset($this->rules[$columnName]['min']) 
-                && 
-                intval($this->params[$columnName]) < intval($this->rules[$columnName]['min'])
-            ){
-                $this->setError($columnName,'min');
-            }            
+    protected function min($columnName)
+    {
+        if ( isset($this->params[$columnName]) && !empty($this->rules[$columnName]['min']) ) {
+            if(!(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false)){
+                if(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) < $this->rules[$columnName]['min']){
+                    $this->setError($columnName, 'min');
+                }
+            }
         }
         return;
     }
 
-
+    /**
+     * 设置默认零值
+     * @return void
+     */
+    protected function setDefault($columnName)
+    {
+        if (isset($this->params[$columnName])) {
+            if (in_array('default', array_keys($this->rules[$columnName]))) {
+                if ( $this->params[$columnName] == '') {
+                    $this->params[$columnName] = $this->rules[$columnName]['default'];
+                }
+            }
+        }
+        return;
+    }
 
     /**
      * 获取验证后的数据
@@ -158,7 +188,8 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function getParam($columnName){
+    public function getParam($columnName)
+    {
         return $this->params[$columnName];
     }
 
@@ -167,7 +198,8 @@ class IntegerValidator implements BaseValidator
      *
      * @return array
      */
-    public function getError(){
+    public function getError()
+    {
         return $this->error;
     }
 
@@ -178,14 +210,17 @@ class IntegerValidator implements BaseValidator
      * @param string $columnName
      * @return void
      */
-    public function validate($columnName){
+    public function validate($columnName)
+    {
         // 1 必填校验
         $this->required($columnName);
         // 2 格式校验
         $this->format($columnName);
-        // 3 最大数值校验
+        // 3 默认零值
+        $this->setDefault($columnName);
+        // 4 最大数值校验
         $this->max($columnName);
-        // 4 最小数值校验
+        // 5 最小数值校验
         $this->min($columnName);
         return;
     }

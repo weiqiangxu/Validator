@@ -62,8 +62,11 @@ class RangeValidator implements BaseValidator
                 case 'required':
                     $error = '字段值不能为空';
                     break;
+                case 'format':
+                    $error = '字段值必须为枚举值';
+                    break;
                 case 'range':
-                    $error = '字段值超出范围';
+                    $error = '枚举值未配置';
                     break;
                 default:
                     break;
@@ -83,10 +86,15 @@ class RangeValidator implements BaseValidator
             isset($this->rules[$columnName]['required'])
             &&
             boolval($this->rules[$columnName]['required'])
-            &&
-            !isset($this->params[$columnName])
         ) {
-            $this->setError($columnName, 'required');
+            if (!isset($this->params[$columnName])) {
+                // 键值都不存在
+                $this->setError($columnName, 'required');
+            } else {
+                if ($this->params[$columnName] == '' || $this->params[$columnName] == null) {
+                    $this->setError($columnName, 'required');
+                }
+            }
         }
         return;
     }
@@ -99,14 +107,32 @@ class RangeValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if (isset($this->params[$columnName]) ) {
-            if(
-                !empty($this->rules[$columnName]['range'])
+        if (isset($this->params[$columnName])) {
+            if (
+                isset($this->rules[$columnName]['required'])
                 &&
-                is_array($this->rules[$columnName]['range'])
-            ){
-                if(!in_array($this->params[$columnName],$this->rules[$columnName]['range'])){
-                    $this->setError($columnName,"range");
+                boolval($this->rules[$columnName]['required'])
+            ) {
+                // 必填项
+                if(empty($this->rules[$columnName]['range']) || !is_array($this->rules[$columnName]['range'])){
+                    $this->setError($columnName, "range");
+                }else{
+                    if($this->params[$columnName] != ''){
+                        if (!in_array($this->params[$columnName], $this->rules[$columnName]['range'])) {
+                            $this->setError($columnName, "format");
+                        }
+                    }
+                }
+            } else {
+                // 非必填
+                if ($this->params[$columnName] != '') {
+                    if(empty($this->rules[$columnName]['range']) || !is_array($this->rules[$columnName]['range'])){
+                        $this->setError($columnName, "range");
+                    }else{
+                        if (!in_array($this->params[$columnName], $this->rules[$columnName]['range'])) {
+                            $this->setError($columnName, "format");
+                        }
+                    }
                 }
             }
         }

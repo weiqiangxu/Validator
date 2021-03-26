@@ -85,30 +85,9 @@ class TimeValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if (
-            isset($this->rules[$columnName]['required'])
-            &&
-            boolval($this->rules[$columnName]['required'])
-        ) {
-            if (!isset($this->params[$columnName])) {
+        if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+            if (!isset($this->params[$columnName]) || $this->params[$columnName] == '') {
                 $this->setError($columnName, 'required');
-            } else {
-                switch ($this->params[$columnName]) {
-                    case false:
-                        $this->setError($columnName, 'required');
-                        break;
-                    case null:
-                        $this->setError($columnName, 'required');
-                        break;
-                    case "":
-                        $this->setError($columnName, 'required');
-                        break;
-                    case 0:
-                        $this->setError($columnName, 'required');
-                        break;
-                    default:
-                        break;
-                }
             }
         }
         return;
@@ -124,26 +103,15 @@ class TimeValidator implements BaseValidator
     protected function format($columnName)
     {
         if (isset($this->params[$columnName])) {
-            if (
-                isset($this->rules[$columnName]['required'])
-                &&
-                boolval($this->rules[$columnName]['required'])
-            ) {
-                if (
-                    !$this->checkDateFormat($this->params[$columnName])
-                    &&
-                    !$this->checkDateTimeFormat($this->params[$columnName])
-                ) {
-                    $this->setError($columnName, 'format');
+            if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+                if ($this->params[$columnName] != '') {
+                    if (!$this->checkIsTime($this->params[$columnName])) {
+                        $this->setError($columnName, 'format');
+                    }
                 }
             } else {
-                // 非必填不为空才会校验
-                if (!empty($this->params[$columnName])) {
-                    if (
-                        !$this->checkDateFormat($this->params[$columnName])
-                        &&
-                        !$this->checkDateTimeFormat($this->params[$columnName])
-                    ) {
+                if ($this->params[$columnName] != '') {
+                    if (!$this->checkIsTime($this->params[$columnName])) {
                         $this->setError($columnName, 'format');
                     }
                 }
@@ -159,12 +127,8 @@ class TimeValidator implements BaseValidator
     protected function setDefault($columnName)
     {
         if (isset($this->params[$columnName])) {
-            if(in_array('default',array_keys($this->rules[$columnName]))){
-                if (
-                    $this->params[$columnName] == ""
-                    || $this->params[$columnName] === false
-                    || $this->params[$columnName] == "0"
-                ) {
+            if ($this->params[$columnName] == '') {
+                if (in_array('default', array_keys($this->rules[$columnName]))) {
                     $this->params[$columnName] = $this->rules[$columnName]['default'];
                 }
             }
@@ -181,18 +145,12 @@ class TimeValidator implements BaseValidator
      */
     protected function max($columnName)
     {
-        if (
-            isset($this->params[$columnName])
-            &&
-            strtotime($this->params[$columnName])
-            &&
-            (!empty($this->rules[$columnName]['max'])
-                &&
-                strtotime($this->rules[$columnName]['max'])
-                &&
-                strtotime($this->params[$columnName]) > strtotime($this->rules[$columnName]['max']))
-        ) {
-            $this->setError($columnName, 'max');
+        if (isset($this->params[$columnName]) && strtotime($this->params[$columnName])) {
+            if (!empty($this->rules[$columnName]['max']) && strtotime($this->rules[$columnName]['max'])) {
+                if (strtotime($this->params[$columnName]) > strtotime($this->rules[$columnName]['max'])) {
+                    $this->setError($columnName, 'max');
+                }
+            }
         }
         return;
     }
@@ -205,56 +163,31 @@ class TimeValidator implements BaseValidator
      */
     protected function min($columnName)
     {
-        if (
-            isset($this->params[$columnName])
-            &&
-            strtotime($this->params[$columnName])
-            &&
-            (!empty($this->rules[$columnName]['min'])
-                &&
-                strtotime($this->rules[$columnName]['min'])
-                &&
-                strtotime($this->params[$columnName]) < strtotime($this->rules[$columnName]['min']))
-        ) {
-            $this->setError($columnName, 'min');
+        if (isset($this->params[$columnName]) && strtotime($this->params[$columnName])) {
+            if (!empty($this->rules[$columnName]['min']) && strtotime($this->rules[$columnName]['min'])) {
+                if (strtotime($this->params[$columnName]) < strtotime($this->rules[$columnName]['min'])) {
+                    $this->setError($columnName, 'min');
+                }
+            }
         }
         return;
     }
 
     /**
-     * 校验日期格式
+     * 校验是时间格式
      *
-     * @param string $date
-     * @link https://www.runoob.com/w3cnote/date-format-validation-in-php.html
-     * @return void
+     * @param string $t | Ymd | Y-m-d H:i:s | Y-m-d
+     * 
+     * @return bool
      */
-    function checkDateFormat($date)
+    function checkIsTime($t)
     {
-        //匹配日期格式
-        if (preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date, $parts)) {
-            //检测是否为日期
-            if (checkdate($parts[2], $parts[3], $parts[1]))
-                return true;
-            else
-                return false;
-        } else {
+        $dateTime = date_create($t);
+        if (!$dateTime) {
             return false;
         }
-    }
-
-
-    /**
-     * 校验日期格式
-     *
-     * @param string $date
-     * @link https://www.runoob.com/w3cnote/date-format-validation-in-php.html
-     * @return void
-     */
-    function checkDateTimeFormat($date)
-    {
-        $dateTime = date_create($date);
-        if (!$dateTime || $date != date_format($dateTime, 'Y-m-d H:i:s')) {
-            return false;
+        if ($t == date_format($dateTime, 'Y-m-d H:i:s') || $t == date_format($dateTime, 'Ymd') || $t == date_format($dateTime, 'Y-m-d')) {
+            return true;
         }
         return true;
     }
@@ -267,16 +200,10 @@ class TimeValidator implements BaseValidator
      */
     protected function layout($columnName)
     {
-        if (
-            isset($this->params[$columnName])
-            &&
-            strtotime($this->params[$columnName])
-            &&
-            !empty($this->rules[$columnName]['layout'])
-            &&
-            empty($this->error)
-        ) {
-            $this->params[$columnName] = date($this->rules[$columnName]['layout'], strtotime($this->params[$columnName]));
+        if (isset($this->params[$columnName]) && $this->checkIsTime($this->params[$columnName])){
+            if(!empty($this->rules[$columnName]['layout'])){
+                $this->params[$columnName] = date($this->rules[$columnName]['layout'], strtotime($this->params[$columnName]));
+            }
         }
         return;
     }

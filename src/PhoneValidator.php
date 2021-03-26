@@ -83,10 +83,14 @@ class PhoneValidator implements BaseValidator
             isset($this->rules[$columnName]['required'])
             &&
             boolval($this->rules[$columnName]['required'])
-            &&
-            !isset($this->params[$columnName])
         ) {
-            $this->setError($columnName, 'required');
+            if (!isset($this->params[$columnName])) {
+                $this->setError($columnName, 'required');
+            } else {
+                if ($this->params[$columnName] == '') {
+                    $this->setError($columnName, 'required');
+                }
+            }
         }
         return;
     }
@@ -99,10 +103,25 @@ class PhoneValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if (isset($this->params[$columnName]) ) {
-            if(!preg_match('/^(((13[0-9]{1})|(15[0-9]{1})|(16[0-9]{1})|(17[3-8]{1})|(18[0-9]{1})|(19[0-9]{1})|(14[5-7]{1}))+\d{8})$/',
-                $this->params[$columnName])){
-                $this->setError($columnName,"format");
+        if (isset($this->params[$columnName])) {
+            if (
+                isset($this->rules[$columnName]['required'])
+                &&
+                boolval($this->rules[$columnName]['required'])
+            ) {
+                // 必填项 - 格式校验
+                if ($this->params[$columnName] != '') {
+                    if (!preg_match('/^1\d{10}$/', $this->params[$columnName])) {
+                        $this->setError($columnName, "format");
+                    }
+                }
+            } else {
+                // 非必填项 - 不为空做校验
+                if ($this->params[$columnName] != '') {
+                    if (!preg_match('/^1\d{10}$/', $this->params[$columnName])) {
+                        $this->setError($columnName, "format");
+                    }
+                }
             }
         }
         return;

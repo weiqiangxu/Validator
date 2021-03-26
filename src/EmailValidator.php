@@ -79,14 +79,10 @@ class EmailValidator implements BaseValidator
      */
     protected function required($columnName)
     {
-        if (
-            isset($this->rules[$columnName]['required'])
-            &&
-            boolval($this->rules[$columnName]['required'])
-            &&
-            !isset($this->params[$columnName])
-        ) {
-            $this->setError($columnName, 'required');
+        if ( isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+            if(!isset($this->params[$columnName]) || $this->params[$columnName]==''){
+                $this->setError($columnName, 'required');
+            }
         }
         return;
     }
@@ -99,9 +95,17 @@ class EmailValidator implements BaseValidator
      */
     protected function format($columnName)
     {
-        if (isset($this->params[$columnName]) ) {
-            if(!filter_var($this->params[$columnName], FILTER_VALIDATE_EMAIL)){
-                $this->setError($columnName,"format");
+        if (isset($this->params[$columnName])) {
+            if (isset($this->rules[$columnName]['required']) && boolval($this->rules[$columnName]['required'])) {
+                // 必填项
+                if ($this->params[$columnName] != '' && filter_var($this->params[$columnName], FILTER_VALIDATE_EMAIL) === false ) {
+                    $this->setError($columnName, "format");
+                }
+            }else{
+                // 非必填项
+                if ($this->params[$columnName] != '' && filter_var($this->params[$columnName], FILTER_VALIDATE_EMAIL) === false ) {
+                    $this->setError($columnName, "format");
+                }
             }
         }
         return;
