@@ -60,16 +60,16 @@ class IntegerValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName . '字段值不能为空';
                     break;
                 case 'max':
-                    $error = '数字大小超出限制';
+                    $error = $columnName . '字段值数字大小超出限制';
                     break;
                 case 'min':
-                    $error = '数字不得超出最小限制';
+                    $error = $columnName . '数字不得超出最小限制';
                     break;
                 case 'format':
-                    $error = '限定数字格式';
+                    $error = $columnName . '限定数字格式';
                     break;
                 default:
                     break;
@@ -112,7 +112,7 @@ class IntegerValidator implements BaseValidator
                 if ($this->params[$columnName] != '') {
                     if (filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false) {
                         $this->setError($columnName, 'format');
-                    }else{
+                    } else {
                         $this->params[$columnName] = filter_var($this->params[$columnName], FILTER_VALIDATE_INT);
                     }
                 }
@@ -138,9 +138,9 @@ class IntegerValidator implements BaseValidator
      */
     protected function max($columnName)
     {
-        if ( isset($this->params[$columnName]) && !empty($this->rules[$columnName]['max']) ) {
-            if(!(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false)){
-                if(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) > $this->rules[$columnName]['max']){
+        if (isset($this->params[$columnName]) && !empty($this->rules[$columnName]['max'])) {
+            if (!(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false)) {
+                if (filter_var($this->params[$columnName], FILTER_VALIDATE_INT) > $this->rules[$columnName]['max']) {
                     $this->setError($columnName, 'max');
                 }
             }
@@ -156,9 +156,9 @@ class IntegerValidator implements BaseValidator
      */
     protected function min($columnName)
     {
-        if ( isset($this->params[$columnName]) && !empty($this->rules[$columnName]['min']) ) {
-            if(!(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false)){
-                if(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) < $this->rules[$columnName]['min']){
+        if (isset($this->params[$columnName]) && !empty($this->rules[$columnName]['min'])) {
+            if (!(filter_var($this->params[$columnName], FILTER_VALIDATE_INT) === false)) {
+                if (filter_var($this->params[$columnName], FILTER_VALIDATE_INT) < $this->rules[$columnName]['min']) {
                     $this->setError($columnName, 'min');
                 }
             }
@@ -174,8 +174,10 @@ class IntegerValidator implements BaseValidator
     {
         if (isset($this->params[$columnName])) {
             if (in_array('default', array_keys($this->rules[$columnName]))) {
-                if ( $this->params[$columnName] == '') {
-                    $this->params[$columnName] = $this->rules[$columnName]['default'];
+                if (isset($this->rules[$columnName]['required']) && !boolval($this->rules[$columnName]['required'])) {
+                    if ($this->params[$columnName] == '') {
+                        $this->params[$columnName] = $this->rules[$columnName]['default'];
+                    }
                 }
             }
         }

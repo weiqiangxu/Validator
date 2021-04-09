@@ -60,16 +60,16 @@ class FloatValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName.'字段值不能为空';
                     break;
                 case 'max':
-                    $error = '数字大小超出限制';
+                    $error = $columnName.'数字大小超出限制';
                     break;
                 case 'min':
-                    $error = '数字不得超出最小限制';
+                    $error = $columnName.'数字不得超出最小限制';
                     break;
                 case 'format':
-                    $error = '格式不是小数点格式';
+                    $error = $columnName.'格式不是小数点格式';
                     break;
                 default:
                     break;

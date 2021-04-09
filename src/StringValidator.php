@@ -60,16 +60,16 @@ class StringValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName . '字段值不能为空';
                     break;
                 case 'maxLength':
-                    $error = '字段长度超出限制';
+                    $error = $columnName . '字段长度超出限制';
                     break;
                 case 'minLength':
-                    $error = '字段长度小于最小长度';
+                    $error = $columnName . '字段长度小于最小长度';
                     break;
                 case 'format':
-                    $error = '限定字符串格式';
+                    $error = $columnName . '限定字符串格式';
                     break;
                 default:
                     break;
@@ -108,33 +108,36 @@ class StringValidator implements BaseValidator
     }
 
     /**
-     * 最大长度校验
+     * 最大长度校验|非空字符串+有最小设定
      *
      * @param string $columnName
      * @return void
      */
     protected function maxLength($columnName)
     {
-        if (
-            isset($this->params[$columnName]) &&
-            (!empty($this->rules[$columnName]['maxLength']) && mb_strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength'])
-        ) {
-            $this->setError($columnName, 'maxLength');
+        if (isset($this->params[$columnName]) && $this->params[$columnName] != '') {
+            if (isset($this->rules[$columnName]['maxLength'])) {
+                if (mb_strlen($this->params[$columnName]) > $this->rules[$columnName]['maxLength']) {
+                    $this->setError($columnName, 'maxLength');
+                }
+            }
         }
         return;
     }
 
     /**
-     * 最小长度校验
+     * 最小长度校验|非空字符串+有最小设定
      *
      * @param string $columnName
      * @return void
      */
     protected function minLength($columnName)
     {
-        if (isset($this->params[$columnName])) {
-            if ( isset($this->rules[$columnName]['minLength']) && mb_strlen($this->params[$columnName]) > $this->rules[$columnName]['minLength']) {
-                $this->setError($columnName, 'minLength');
+        if (isset($this->params[$columnName]) && $this->params[$columnName] != '') {
+            if (isset($this->rules[$columnName]['minLength'])) {
+                if (mb_strlen($this->params[$columnName]) < $this->rules[$columnName]['minLength']) {
+                    $this->setError($columnName, 'minLength');
+                }
             }
         }
         return;

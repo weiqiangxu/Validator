@@ -60,10 +60,10 @@ class PhoneValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName.'字段值不能为空';
                     break;
                 case 'format':
-                    $error = '手机号码格式非法';
+                    $error = $columnName.'字段值手机号码格式非法';
                     break;
                 default:
                     break;

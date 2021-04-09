@@ -60,10 +60,10 @@ class EmailValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName.'字段值不能为空';
                     break;
                 case 'format':
-                    $error = '必须为邮件格式';
+                    $error = $columnName.'必须为邮件格式';
                     break;
                 default:
                     break;

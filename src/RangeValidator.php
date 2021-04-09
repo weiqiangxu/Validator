@@ -60,13 +60,13 @@ class RangeValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName.'字段值不能为空';
                     break;
                 case 'format':
-                    $error = '字段值必须为枚举值';
+                    $error = $columnName.'字段值必须为枚举值';
                     break;
                 case 'range':
-                    $error = '枚举值未配置';
+                    $error = $columnName.'枚举值未配置';
                     break;
                 default:
                     break;

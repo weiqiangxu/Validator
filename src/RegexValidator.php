@@ -60,13 +60,13 @@ class RegexValidator implements BaseValidator
             $error = '';
             switch ($errorTag) {
                 case 'required':
-                    $error = '字段值不能为空';
+                    $error = $columnName.'字段值不能为空';
                     break;
                 case 'format':
-                    $error = '正则校验不通过';
+                    $error = $columnName.'正则校验不通过';
                     break;
                 case 'regex':
-                    $error = '正则表达式缺失';
+                    $error = $columnName.'正则表达式缺失';
                     break;
                 default:
                     break;
