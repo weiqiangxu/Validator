@@ -124,15 +124,14 @@ class DateValidator implements BaseValidator
     }
 
     /**
-     * 设置默认零值
+     * 设置默认零值|空字符串 + 非必填 + 有默认值
      * @return void
      */
     protected function setDefault($columnName)
     {
-        if (isset($this->params[$columnName])) {
-            if ($this->rules[$columnName] == '') {
-                // 规则有默认零值
-                if (in_array('default', array_keys($this->rules[$columnName]))) {
+        if (isset($this->params[$columnName]) && $this->params[$columnName] == "") {
+            if (isset($this->rules[$columnName]['required']) && !boolval($this->rules[$columnName]['required'])) {
+                if(in_array('default',array_keys($this->rules[$columnName]))){
                     $this->params[$columnName] = $this->rules[$columnName]['default'];
                 }
             }
